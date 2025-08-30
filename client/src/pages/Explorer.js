@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Search, 
-  TrendingUp, 
+  TrendingUp,   
   TrendingDown, 
-  BarChart3, 
-  PieChart, 
-  MapPin, 
+  BarChart3,
+  PieChart,
+  MapPin,
   Calendar,
   Package,
   CreditCard,
@@ -15,7 +15,7 @@ import {
   Filter
 } from 'lucide-react';
 import { format } from 'date-fns';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart as RechartsPieChart, Cell } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart as RechartsPieChart, Cell, Pie } from 'recharts';
 
 const Explorer = () => {
   const [searchTerm, setSearchTerm] = useState('');

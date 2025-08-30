@@ -16,7 +16,8 @@ import {
   CreditCard,
   Package,
   CheckCircle,
-  Clock
+  Clock, 
+  Lock
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
