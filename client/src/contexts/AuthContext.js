@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 
 const AuthContext = createContext();
@@ -12,26 +12,31 @@ export const useAuth = () => {
   return context;
 };
 
+// ✅ Create axios instance with fixed backend URL
+const api = axios.create({
+  baseURL: 'http://localhost:5000/api', // force all calls to backend
+});
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [token, setToken] = useState(localStorage.getItem('token'));
 
-  // Configure axios defaults
+  // Attach token to axios instance
   useEffect(() => {
     if (token) {
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
     } else {
-      delete axios.defaults.headers.common['Authorization'];
+      delete api.defaults.headers.common['Authorization'];
     }
   }, [token]);
 
-  // Check if user is authenticated on app load
+  // Check authentication on load
   useEffect(() => {
     const checkAuth = async () => {
       if (token) {
         try {
-          const response = await axios.get('/api/auth/me');
+          const response = await api.get('/auth/me');
           setUser(response.data.data.user);
         } catch (error) {
           console.error('Auth check failed:', error);
@@ -41,20 +46,19 @@ export const AuthProvider = ({ children }) => {
       }
       setLoading(false);
     };
-
     checkAuth();
   }, [token]);
 
-  // Login function
+  // Login
   const login = async (email, password) => {
     try {
-      const response = await axios.post('/api/auth/login', { email, password });
+      const response = await api.post('/auth/login', { email, password });
       const { user: userData, token: authToken } = response.data.data;
-      
+
       setUser(userData);
       setToken(authToken);
       localStorage.setItem('token', authToken);
-      
+
       toast.success('Login successful!');
       return { success: true };
     } catch (error) {
@@ -64,16 +68,16 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Signup function
+  // Signup
   const signup = async (userData) => {
     try {
-      const response = await axios.post('/api/auth/signup', userData);
+      const response = await api.post('/auth/signup', userData);
       const { user: newUser, token: authToken } = response.data.data;
-      
+
       setUser(newUser);
       setToken(authToken);
       localStorage.setItem('token', authToken);
-      
+
       toast.success('Account created successfully!');
       return { success: true };
     } catch (error) {
@@ -83,19 +87,19 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Logout function
+  // Logout
   const logout = () => {
     setUser(null);
     setToken(null);
     localStorage.removeItem('token');
-    delete axios.defaults.headers.common['Authorization'];
+    delete api.defaults.headers.common['Authorization'];
     toast.success('Logged out successfully');
   };
 
-  // Update user profile
+  // Update profile
   const updateProfile = async (profileData) => {
     try {
-      const response = await axios.put('/api/users/profile', profileData);
+      const response = await api.put('/users/profile', profileData);
       const updatedUser = response.data.data.user;
       setUser(updatedUser);
       toast.success('Profile updated successfully!');
@@ -110,7 +114,7 @@ export const AuthProvider = ({ children }) => {
   // Change password
   const changePassword = async (currentPassword, newPassword) => {
     try {
-      await axios.put('/api/users/password', { currentPassword, newPassword });
+      await api.put('/users/password', { currentPassword, newPassword });
       toast.success('Password changed successfully!');
       return { success: true };
     } catch (error) {
@@ -123,9 +127,9 @@ export const AuthProvider = ({ children }) => {
   // Refresh token
   const refreshToken = async () => {
     try {
-      const response = await axios.post('/api/auth/refresh');
+      const response = await api.post('/auth/refresh');
       const { token: newToken } = response.data.data;
-      
+
       setToken(newToken);
       localStorage.setItem('token', newToken);
       return { success: true };
@@ -136,15 +140,8 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Check if user has specific role
-  const hasRole = (role) => {
-    return user && user.role === role;
-  };
-
-  // Check if user has any of the specified roles
-  const hasAnyRole = (roles) => {
-    return user && roles.includes(user.role);
-  };
+  const hasRole = (role) => user && user.role === role;
+  const hasAnyRole = (roles) => user && roles.includes(user.role);
 
   const value = {
     user,
@@ -157,12 +154,8 @@ export const AuthProvider = ({ children }) => {
     changePassword,
     refreshToken,
     hasRole,
-    hasAnyRole
+    hasAnyRole,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

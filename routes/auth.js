@@ -67,6 +67,7 @@ router.post('/signup', [
     }
 
     // Create new user
+    
     const user = new User({
       name,
       email,
@@ -148,6 +149,8 @@ router.post('/login', [
         message: 'Account is deactivated. Please contact support.'
       });
     }
+    console.log('Entered password:', password);
+    console.log('Stored password hash:', user.password);
 
     // Verify password
     const isPasswordValid = await user.comparePassword(password);
