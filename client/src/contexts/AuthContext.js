@@ -14,7 +14,7 @@ export const useAuth = () => {
 
 // ✅ Create axios instance with fixed backend URL
 const api = axios.create({
-  baseURL: 'http://localhost:5000/api', // force all calls to backend
+  baseURL: 'http://localhost:5001/api', // force all calls to backend
 });
 
 export const AuthProvider = ({ children }) => {
